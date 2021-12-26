@@ -1,6 +1,6 @@
 import { defineConfig } from 'dumi';
 
-const repo = 'React-Book';
+const repo = 'react-book';
 
 export default defineConfig({
   title: repo,
