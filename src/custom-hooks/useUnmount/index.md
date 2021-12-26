@@ -9,7 +9,7 @@ title: useUnmount
 order: 2
 ---
 
-# useMount
+# useUnmount
 
 A hook that executes a function after the component is unmounted.
 
