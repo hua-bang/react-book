@@ -61,3 +61,20 @@ useUnmount(fn: () => void);
 | Property | Description                 | Type         | Default |
 | -------- | --------------------------- | ------------ | ------- |
 | fn       | The function to be executed | `() => void` | -       |
+
+### Code
+
+```ts
+import { useEffect } from 'react';
+
+const useUnmount = (fn: () => void) => {
+  useEffect(
+    () => () => {
+      fn();
+    },
+    [],
+  );
+};
+
+export default useUnmount;
+```
