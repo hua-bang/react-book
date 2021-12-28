@@ -7,7 +7,9 @@ group:
   order: 1
 title: useBoolean
 order: 3
----# useBoolean
+---
+
+# useBoolean
 
 A hook that elegantly manages boolean state.
 
