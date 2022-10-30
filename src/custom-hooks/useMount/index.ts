@@ -1,9 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, EffectCallback } from 'react';
 
-const useMount = (fn: () => void) => {
-  useEffect(() => {
-    fn();
-  }, []);
+const useMount = (fn: EffectCallback) => {
+  useEffect(fn, []);
 };
 
 export default useMount;
