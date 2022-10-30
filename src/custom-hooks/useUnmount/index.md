@@ -19,13 +19,24 @@ A hook that executes a function after the component is unmounted.
 
 ```tsx
 import useUnmount from './index.ts';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { message } from 'antd';
 import 'antd/dist/antd.css';
 
 const MyComponent = () => {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setCount(prev => prev + 1);
+    }, 200);
+    return () => {
+      clearInterval(id);
+    };
+  }, []);
+
   useUnmount(() => {
-    message.success('unMount');
+    message.success(`unMount, ${count}.`);
   });
 
   return <div>Hello World</div>;
@@ -69,9 +80,7 @@ import { useEffect } from 'react';
 
 const useUnmount = (fn: () => void) => {
   useEffect(
-    () => () => {
-      fn();
-    },
+    () => fn
     [],
   );
 };
