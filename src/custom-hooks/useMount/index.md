@@ -3,8 +3,8 @@ nav:
   title: Custom-Hooks
   path: /custom-hooks
 group:
-  title: Custom-Hooks
-  order: 1
+  title: Life Cycle
+  order: 2
 title: useMount
 order: 1
 ---
