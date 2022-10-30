@@ -3,8 +3,8 @@ nav:
   title: Custom-Hooks
   path: /custom-hooks
 group:
-  title: Custom-Hooks
-  order: 1
+  title: State
+  order: 3
 title: useSetState
 order: 4
 ---
@@ -70,19 +70,18 @@ const [state, setState] = useSetState<T extends Record<string, any>>(
 ### code
 
 ```ts
-import { useState, useCallback } from 'react';
-import { isFunction } from '../../utils/index';
+import { useCallback, useState } from 'react';
+import { isFunction } from '@/utils';
 
-export type SetState<S extends Record<string, any>> = <K extends keyof S>(
-  state: Pick<S, K> | null | ((prev: Readonly<S>) => Pick<S, K> | null | S),
+export type SetState<S extends Record<string, any>> = (
+  state: Partial<S> | ((prev: S) => S),
 ) => void;
 
 const useSetState = <S extends Record<string, any>>(
-  initialState: S | (() => S),
+  initialVal: S | (() => S),
 ): [S, SetState<S>] => {
-  const [state, setState] = useState(initialState);
-
-  const setMergeState = useCallback(patch => {
+  const [state, setState] = useState(initialVal);
+  const setMergeState: SetState<S> = useCallback(patch => {
     setState(prevState => {
       const newState = isFunction(patch) ? patch(prevState) : patch;
       return newState ? { ...prevState, ...newState } : prevState;
