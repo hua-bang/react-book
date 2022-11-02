@@ -1,25 +1,21 @@
 import { useState, useMemo } from 'react';
 
-interface Actions {
-  toggle: () => void;
-  set: (val: boolean) => void;
-  setTrue: () => void;
-  setFalse: () => void;
-}
+const useBoolean = (defaultValue: boolean = false) => {
+  const [value, setValue] = useState(defaultValue);
 
-const useBoolean = (defaultValue: boolean) => {
-  const [val, setVal] = useState<boolean>(defaultValue);
+  const actions = useMemo(() => {
+    const setTrue = () => setValue(true);
+    const setFalse = () => setValue(false);
+    const toggle = () => setValue(prev => !prev);
+    return {
+      set: setValue,
+      toggle,
+      setTrue,
+      setFalse,
+    };
+  }, [value]);
 
-  const actions: Actions = useMemo(
-    () => ({
-      toggle: () => setVal(prev => !prev),
-      set: setVal,
-      setTrue: () => setVal(true),
-      setFalse: () => setVal(false),
-    }),
-    [],
-  );
-  return [val, actions];
+  return [value, actions];
 };
 
 export default useBoolean;
