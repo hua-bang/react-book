@@ -3,7 +3,7 @@ nav:
   title: Custom-Hooks
   path: /custom-hooks
 group:
-  title: Custom-Hooks
+  title: State
   order: 1
 title: useSet
 order: 13
