@@ -6,7 +6,7 @@ group:
   title: State
   order: 3
 title: useSetState
-order: 4
+order: 1
 ---
 
 # useSetState

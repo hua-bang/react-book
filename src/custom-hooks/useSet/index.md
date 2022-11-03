@@ -6,7 +6,7 @@ group:
   title: State
   order: 1
 title: useSet
-order: 13
+order: 2
 ---
 
 # useSet
@@ -79,51 +79,50 @@ const [
 ## Code
 
 ```ts
-import { useState } from 'react';
-import useMemoizedFn from '../useMemoizedFn';
+import React, { useMemo, useState } from 'react';
 
 interface Actions<T> {
-  add: (key: T) => void;
-  remove: (key: T) => void;
+  add: (val: T) => void;
+  remove: (value: T) => void;
   reset: () => void;
 }
 
-const useSet = <T>(initialValue: Iterable<T>): [Set<T>, Actions<T>] => {
-  const getInitialVal = () => {
-    return initialValue === undefined ? new Set<T>() : new Set(initialValue);
-  };
+const useSet = <T>(initialVal?: Iterable<T>) => {
+  const getInitialVal = () =>
+    initialVal === undefined ? new Set<T>() : new Set(initialVal);
 
-  const [set, setSet] = useState(() => getInitialVal());
+  const [set, setSet] = useState<Set<T>>(() => getInitialVal());
 
-  const add = (key: T) => {
-    if (set.has(key)) {
-      return;
-    }
-    setSet(prevSet => {
-      const temp = new Set(prevSet);
-      temp.add(key);
-      return temp;
-    });
-  };
-
-  const remove = (key: T) => {
-    if (!set.has(key)) {
-      return;
-    }
-    setSet(prevSet => {
-      const temp = new Set(prevSet);
-      temp.delete(key);
-      return temp;
-    });
-  };
-
-  const reset = () => setSet(() => getInitialVal());
-
-  const actions: Actions<T> = {
-    add: useMemoizedFn(add),
-    remove: useMemoizedFn(remove),
-    reset: useMemoizedFn(reset),
-  };
+  const actions: Actions<T> = useMemo(() => {
+    const add = (val: T) => {
+      if (set.has(val)) {
+        return;
+      }
+      setSet(prev => {
+        const tempSet = new Set(prev);
+        tempSet.add(val);
+        return tempSet;
+      });
+    };
+    const remove = (val: T) => {
+      if (!set.has(val)) {
+        return;
+      }
+      setSet(prev => {
+        const tempSet = new Set(prev);
+        tempSet.delete(val);
+        return tempSet;
+      });
+    };
+    const reset = () => {
+      setSet(() => getInitialVal());
+    };
+    return {
+      add,
+      remove,
+      reset,
+    };
+  }, [initialVal]);
 
   return [set, actions];
 };
