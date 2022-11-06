@@ -1,5 +1,5 @@
 import { isFunction } from '../../utils';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 
 type StorageType = typeof localStorage | typeof sessionStorage;
 
@@ -42,7 +42,7 @@ const useStorageByType = (storage: StorageType): StorageHooks => {
 
     const [value, setValue] = useState<T>(() => getInitialValue());
 
-    const setStorageValue = (batch?: T | ((prev: T) => T)) => {
+    const setStorageValue = useCallback((batch?: T | ((prev: T) => T)) => {
       setValue(prevState => {
         const nextState =
           (isFunction(batch) ? batch(prevState) : batch) || ('' as T);
@@ -53,7 +53,7 @@ const useStorageByType = (storage: StorageType): StorageHooks => {
         }
         return nextState;
       });
-    };
+    }, []);
 
     return [value, setStorageValue];
   };
