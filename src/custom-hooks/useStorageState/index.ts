@@ -1,58 +1,64 @@
-import { useState, useCallback } from 'react';
 import { isFunction } from '../../utils';
+import { useState } from 'react';
 
-const StorageMap = {
-  localStorage,
-  sessionStorage,
-};
-
-type StorageType = keyof typeof StorageMap;
+type StorageType = typeof localStorage | typeof sessionStorage;
 
 interface Options<T> {
   defaultValue?: T | (() => T);
-  serializer?: (value: T) => string;
-  deserializer?: (value: string) => T;
+  serializer?: (value: T | undefined) => string;
+  deserializer?: (value: string | null) => T;
 }
 
-const useStorageStateByType = (storageType: StorageType) => {
-  const storage = StorageMap[storageType];
+type StorageHooks = <T>(
+  key: string,
+  options: Options<T>,
+) => [T | undefined, (value?: T | ((prev: T) => T)) => void];
+
+const useStorageByType = (storage: StorageType): StorageHooks => {
+  const defaultSerializer = (val: any) => JSON.stringify(val);
+  const defaultDeserializer = (val: string | null) => {
+    if (!val) {
+      return undefined;
+    }
+    return JSON.parse(val);
+  };
 
   const useStorageState = <T>(
     key: string,
-    options: Options<T>,
+    options?: Options<T>,
   ): [T | undefined, (value?: T | ((prev: T) => T)) => void] => {
-    const { serializer = JSON.stringify, deserializer = JSON.parse } = options;
+    const {
+      defaultValue,
+      serializer = defaultSerializer,
+      deserializer = defaultDeserializer,
+    } = options || {};
 
-    const deserializeValue = (storageValue: string) => {
-      return storageValue === 'undefined'
-        ? undefined
-        : deserializer(storageValue);
+    const getInitialValue = () => {
+      if (defaultValue) {
+        return defaultValue;
+      }
+      return deserializer(storage.getItem(key));
     };
 
-    const storageValue = storage.getItem(key);
+    const [value, setValue] = useState<T>(() => getInitialValue());
 
-    const defaultValue = storageValue
-      ? deserializeValue(storageValue)
-      : options.defaultValue;
-
-    const [state, setState] = useState<T>(defaultValue);
-
-    const setLocalStorageState = useCallback(batch => {
-      setState(prevState => {
-        const nextState = isFunction(batch) ? batch(prevState) : batch;
+    const setStorageValue = (batch?: T | ((prev: T) => T)) => {
+      setValue(prevState => {
+        const nextState =
+          (isFunction(batch) ? batch(prevState) : batch) || ('' as T);
         if (!nextState) {
-          storage.setItem(key, serializer(''));
+          storage.setItem(key, '');
         } else {
           storage.setItem(key, serializer(nextState));
         }
         return nextState;
       });
-    }, []);
+    };
 
-    return [state, setLocalStorageState];
+    return [value, setStorageValue];
   };
 
   return useStorageState;
 };
 
-export default useStorageStateByType;
+export default useStorageByType;

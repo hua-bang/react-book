@@ -3,10 +3,10 @@ nav:
   title: Custom-Hooks
   path: /custom-hooks
 group:
-  title: Custom-Hooks
+  title: State
   order: 1
 title: useLocalStorageState
-order: 17
+order: 4
 ---
 
 # useLocalStorageState
