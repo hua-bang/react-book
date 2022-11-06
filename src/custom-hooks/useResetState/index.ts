@@ -5,6 +5,8 @@ const useResetState = <S>(
 ): [S, React.Dispatch<SetStateAction<S>>, () => void] => {
   const [state, setState] = useState(initialState);
 
+  console.log(initialState);
+
   const resetState = useCallback(() => {
     setState(initialState);
   }, []);
