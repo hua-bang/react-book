@@ -1,14 +1,25 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
+import useLatest from '../useLatest';
+import { isFunction } from '../utils';
+import isDev from '../utils/isDev';
 
-interface NonReturnFn {
-  (): void;
-}
+const useUnMount = (fn: () => void) => {
+  if (isDev) {
+    if (!isFunction(fn)) {
+      console.error(
+        `useUnmount expected parameter is a function, got ${typeof fn}`,
+      );
+    }
+  }
 
-const useUnmount = (fn: NonReturnFn) => {
-  const fnRef = useRef<NonReturnFn>(fn);
-  fnRef.current = fn;
+  const fnRef = useLatest(fn);
 
-  useEffect(() => () => fnRef.current(), []);
+  useEffect(
+    () => () => {
+      fnRef.current();
+    },
+    [],
+  );
 };
 
-export default useUnmount;
+export default useUnMount;
