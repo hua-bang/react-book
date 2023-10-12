@@ -1,15 +1,14 @@
 import { useEffect, useRef } from 'react';
 
-const useUnmountedRef = (): React.MutableRefObject<boolean> => {
-  const unmountedRef = useRef<boolean>(false);
+const useUnmountedRef = () => {
+  const unmountedRef = useRef(false);
 
   useEffect(() => {
-    unmountedRef.current = true;
+    unmountedRef.current = false;
     return () => {
-      unmountedRef.current = false;
+      unmountedRef.current = true;
     };
   }, []);
-
   return unmountedRef;
 };
 
