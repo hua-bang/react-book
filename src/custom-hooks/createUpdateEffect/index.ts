@@ -1,25 +1,34 @@
-import { useRef, useEffect, useLayoutEffect } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  DependencyList,
+  EffectCallback,
+  useRef,
+} from 'react';
 
-type EffectHookType = typeof useEffect | typeof useLayoutEffect;
+type EffectHook = typeof useEffect | typeof useLayoutEffect;
 
-export const createUpdateEffect: (
-  hook: EffectHookType,
-) => EffectHookType = hook => (effect, deps) => {
-  const isMounted = useRef(false);
+const createUpdateEffect = (effectHook: EffectHook) => {
+  const useEffectHook = (effect: EffectCallback, deps?: DependencyList) => {
+    const mountedRef = useRef<boolean>(false);
 
-  hook(() => {
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
+    effectHook(() => {
+      return () => {
+        mountedRef.current = false;
+      };
+    }, []);
 
-  hook(() => {
-    if (!isMounted.current) {
-      isMounted.current = true;
-    } else {
+    effectHook(() => {
+      if (!mountedRef.current) {
+        mountedRef.current = true;
+        return;
+      }
+
       return effect();
-    }
-  }, deps);
+    }, deps);
+  };
+
+  return useEffectHook;
 };
 
 export default createUpdateEffect;
