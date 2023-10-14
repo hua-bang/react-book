@@ -19,7 +19,7 @@ export default defineConfig({
     null,
     {
       title: 'GitHub',
-      path: 'https://github.com/umijs/dumi-template',
+      path: 'https://github.com/hua-bang/react-book',
     },
   ],
   // more config: https://d.umijs.org/config

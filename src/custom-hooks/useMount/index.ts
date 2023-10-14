@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import isDev from '../utils/isDev';
-import { isFunction } from '@/utils';
+import { isFunction } from '../utils';
 
 function useMount(fn: () => void) {
   if (isDev) {
