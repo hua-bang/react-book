@@ -22,7 +22,7 @@ import React from 'react';
 import useCounter from './index.ts';
 
 export default () => {
-  const [current, { inc, dec, set, reset }] = useCounter(100, {
+  const [current, { inc, dec, set, reset }] = useCounter(10, {
     min: 1,
     max: 10,
   });
@@ -97,79 +97,83 @@ const [current, { inc, dec, set, reset }] = useCounter(initialValue, {
 ### Code
 
 ```ts
-import { useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import isDev from '../utils/isDev';
+import { isFunction } from '../utils';
 
-interface Options {
-  max: number;
-  min: number;
+export interface useCounterOptions {
+  min?: number;
+  max?: number;
 }
 
-export interface Actions {
-  inc: (delta?: number) => void;
-  dec: (delta?: number) => void;
-  set: (value: number | ((c: number) => number)) => void;
+export interface useCounterActions {
+  inc: () => void;
+  dec: () => void;
+  set: React.Dispatch<React.SetStateAction<number>>;
   reset: () => void;
 }
 
-export type ValueParam = number | ((c: number) => number);
-
-function getTargetValue(val: number, options: Options) {
-  const { min, max } = options;
-  let target = val;
-
-  if (max !== undefined) {
-    target = Math.min(max, target);
-    console.log(target);
-  }
-  if (min !== undefined) {
-    target = Math.max(min, target);
+const checkValValidate = (value: number, options?: useCounterOptions) => {
+  if (!options) {
+    return true;
   }
 
-  return target;
-}
-
-const useCounter = (initialVal = 0, options: Options) => {
   const { min, max } = options;
 
-  const [count, setCount] = useState<number>(() => {
-    return getTargetValue(initialVal, {
-      min,
-      max,
+  if (
+    (min !== undefined && min > value) ||
+    (max !== undefined && max < value)
+  ) {
+    return false;
+  }
+
+  return true;
+};
+
+const checkInitialVal = (initialVal?: number, options?: useCounterOptions) => {
+  if (!isDev) {
+    return;
+  }
+
+  if (initialVal === undefined || !options) {
+    return;
+  }
+
+  const validateRes = checkValValidate(initialVal, options);
+
+  if (!validateRes) {
+    console.log('Your initialVal is invalidate');
+  }
+};
+
+const useCounter = (initialVal = 0, options?: useCounterOptions) => {
+  const [count, setCount] = useState(initialVal || 0);
+
+  const setCountProxy: React.Dispatch<React.SetStateAction<
+    number
+  >> = useCallback(patch => {
+    setCount(prevState => {
+      const newState = isFunction(patch) ? patch(prevState) : patch;
+
+      const newStateValidate = checkValValidate(newState, options);
+
+      return newStateValidate ? newState : prevState;
     });
-  });
+  }, []);
 
-  const setValue = (value: ValueParam) => {
-    setCount(prev => {
-      const target = typeof value === 'number' ? value : value(prev);
-      return getTargetValue(target, {
-        max,
-        min,
-      });
-    });
-  };
+  const actions: useCounterActions = useMemo(
+    () => ({
+      inc: () => setCountProxy(prev => prev + 1),
+      dec: () => setCountProxy(prev => prev - 1),
+      set: setCountProxy,
+      reset: () => setCountProxy(initialVal),
+    }),
+    [],
+  );
 
-  const inc = (delta: number = 1) => {
-    setValue(prev => prev + delta);
-  };
-
-  const dec = (delta: number = 1) => {
-    setValue(prev => prev - delta);
-  };
-
-  const set = (value: ValueParam) => {
-    setValue(value);
-  };
-
-  const reset = () => {
-    setValue(initialVal);
-  };
-
-  const actions: Actions = {
-    inc,
-    dec,
-    set,
-    reset,
-  };
+  useEffect(() => {
+    checkInitialVal(initialVal, options);
+  }, []);
 
   return [count, actions];
 };
