@@ -3,8 +3,8 @@ nav:
   title: Custom-Hooks
   path: /custom-hooks
 group:
-  title: Custom-Hooks
-  order: 1
+  title: State
+  order: 3
 title: useBoolean
 order: 3
 ---
