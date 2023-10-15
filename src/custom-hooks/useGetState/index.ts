@@ -1,25 +1,14 @@
-import { useState, useRef, useCallback, Dispatch, SetStateAction } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
-type GetStateAction<S> = () => S;
+const useGetState = <S>(initialState: S | (() => S)) => {
+  const [state, setState] = useState<S>(initialState);
 
-function useGetState<S>(
-  initialState: S,
-): [S, Dispatch<SetStateAction<S>>, GetStateAction<S>];
-
-function useGetState<S = undefined>(): [
-  S | undefined,
-  Dispatch<SetStateAction<S | undefined>>,
-  GetStateAction<S | undefined>,
-];
-
-function useGetState<S>(initialState?: S) {
-  const [state, setState] = useState(initialState);
-  const stateRef = useRef(state);
+  const stateRef = useRef<S>(state);
   stateRef.current = state;
 
   const getState = useCallback(() => stateRef.current, []);
 
   return [state, setState, getState];
-}
+};
 
 export default useGetState;

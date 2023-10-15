@@ -3,8 +3,8 @@ nav:
   title: Custom-Hooks
   path: /custom-hooks
 group:
-  title: Custom-Hooks
-  order: 1
+  title: State
+  order: 3
 title: useGetState
 order: 15
 ---
@@ -56,34 +56,18 @@ const [state, setState, getState] = useGetState<S>(initialState);
 ### Code
 
 ```ts
-import type { Dispatch, SetStateAction } from 'react';
-import { useState, useRef, useCallback } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
-type GetStateAction<S> = (() => S);
+const useGetState = <S>(initialState: S | (() => S)) => {
+  const [state, setState] = useState<S>(initialState);
 
-function useGetState<S>(
-  initialState: S
-): [ S, Dispatch<SetStateAction<S>>, GetStateAction<S>];
-
-function useGetState<S = undefined>(): [
-  S | undefined,
-  Dispatch<SetStateAction<S | undefined>>,
-  GetStateAction<S| undefined>
-];
-
-function useGetState<S>(initialState?: S) {
-  const [state, setState] = useState(initialState);
-  const stateRef = useRef(state);
+  const stateRef = useRef<S>(state);
   stateRef.current = state;
 
   const getState = useCallback(() => stateRef.current, []);
 
-  return [
-    state,
-    setState,
-    getState
-  ]
-}
+  return [state, setState, getState];
+};
 
 export default useGetState;
 ```
