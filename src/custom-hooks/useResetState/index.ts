@@ -1,14 +1,10 @@
-import { useState, SetStateAction, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
-const useResetState = <S>(
-  initialState: S | (() => S),
-): [S, React.Dispatch<SetStateAction<S>>, () => void] => {
-  const [state, setState] = useState(initialState);
-
-  console.log(initialState);
+const useResetState = <S>(initState: S | (() => S)) => {
+  const [state, setState] = useState<S>(initState);
 
   const resetState = useCallback(() => {
-    setState(initialState);
+    setState(initState);
   }, []);
 
   return [state, setState, resetState];

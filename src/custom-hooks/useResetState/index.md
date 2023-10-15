@@ -4,7 +4,7 @@ nav:
   path: /custom-hooks
 group:
   title: State
-  order: 1
+  order: 4
 title: useResetState
 order: 15
 ---
@@ -64,16 +64,14 @@ const [state, setState, resetState] = useResetState<S>(
 ### Code
 
 ```ts
-import { useState, SetStateAction } from 'react';
+import { useCallback, useState } from 'react';
 
-const useResetState = <S>(
-  initialState: S | (() => S),
-): [S, React.Dispatch<SetStateAction<S>>, () => void] => {
-  const [state, setState] = useState(initialState);
+const useResetState = <S>(initState: S | (() => S)) => {
+  const [state, setState] = useState<S>(initState);
 
-  const resetState = () => {
-    setState(initialState);
-  };
+  const resetState = useCallback(() => {
+    setState(initState);
+  }, []);
 
   return [state, setState, resetState];
 };
