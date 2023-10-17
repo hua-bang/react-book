@@ -1,27 +1,24 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import useLatest from '../useLatest';
 
-const useInterval = (
-  fn: (...args: any[]) => void,
-  delay = 0,
-  immediate = false,
-) => {
+const useInterval = (fn: () => void, delay: number) => {
   const fnRef = useLatest(fn);
+  const timeRef = useRef<NodeJS.Timeout | null>(null);
+
+  const clear = useCallback(() => {
+    if (timeRef.current) {
+      clearInterval(timeRef.current);
+    }
+  }, []);
 
   useEffect(() => {
-    if (!delay) {
-      return;
-    }
-    if (immediate) {
-      fnRef.current();
-    }
-    const timer = setInterval(() => {
-      fnRef.current();
+    const timeId = setInterval(() => {
+      fnRef.current?.();
     }, delay);
 
-    return () => {
-      clearInterval(timer);
-    };
+    timeRef.current = timeId;
+
+    return clear;
   }, [delay]);
 };
 
