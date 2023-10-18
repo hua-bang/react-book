@@ -3,7 +3,7 @@ nav:
   title: Custom-Hooks
   path: /custom-hooks
 group:
-  title: Custom-Hooks
+  title: State
   order: 1
 title: usePrevious
 order: 12
@@ -157,23 +157,25 @@ const previousState: T = usePrevious<T>(
 ```ts
 import { useRef } from 'react';
 
-export type ShouldUpdateFunc<T> = (prev: T | undefined, curr: T) => boolean;
+interface ShouldUpdateFn<T> {
+  (a: T, b: T): boolean;
+}
 
-const defaultShouldUpdate = <T>(a?: T, b?: T) => a !== b;
+const defaultShouldUpdate = <T>(a: T, b: T) => a !== b;
 
 const usePrevious = <T>(
-  state: T,
-  shouldUpdate: ShouldUpdateFunc<T> = defaultShouldUpdate,
-) => {
-  const currRef = useRef<T>();
-  const prevRef = useRef<T>();
+  val: T,
+  shouldUpdate: ShouldUpdateFn<T> = defaultShouldUpdate,
+): T | undefined => {
+  const prefRef = useRef<T>();
+  const currentRef = useRef<T>(val);
 
-  if (shouldUpdate(currRef.current, state)) {
-    prevRef.current = currRef.current;
-    currRef.current = state;
+  if (shouldUpdate(currentRef.current, val)) {
+    prefRef.current = currentRef.current;
+    currentRef.current = val;
   }
 
-  return prevRef.current;
+  return prefRef.current;
 };
 
 export default usePrevious;
