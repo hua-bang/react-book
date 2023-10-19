@@ -1,22 +1,35 @@
-import { useMemo, useRef } from 'react';
+import { useRef } from 'react';
+import isDev from '../utils/isDev';
+import { isFunction } from '../utils';
 
-type noop = (...args: any[]) => any;
+type noop = (this: any, ...args: any[]) => any;
 
-function useMemoized<T extends noop>(fn: T) {
+type PickFunction<T extends noop> = (
+  this: ThisParameterType<T>,
+  ...args: Parameters<T>
+) => ReturnType<T>;
+
+const useMemoizedFn = <T extends noop>(fn: T) => {
+  if (isDev) {
+    if (!isFunction(fn)) {
+      console.error(
+        `useMemoizedFn expected parameter is a function, got ${typeof fn}`,
+      );
+    }
+  }
   const fnRef = useRef<T>(fn);
 
-  fnRef.current = useMemo(() => fn, [fn]);
+  fnRef.current = fn;
 
-  const memoizedFn = useRef<T>();
+  const memoizedFnRef = useRef<PickFunction<T>>();
 
-  if (!memoizedFn.current) {
-    memoizedFn.current = function(this: unknown, ...args) {
-      // eslint-disable-next-line @typescript-eslint/no-invalid-this
-      return fnRef.current.apply(this, args);
-    } as T;
+  if (!memoizedFnRef.current) {
+    memoizedFnRef.current = function(this, ...args: any[]) {
+      return fnRef.current.call(this, ...args);
+    };
   }
 
-  return memoizedFn.current;
-}
+  return memoizedFnRef.current as T;
+};
 
-export default useMemoized;
+export default useMemoizedFn;
