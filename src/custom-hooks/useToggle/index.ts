@@ -1,12 +1,14 @@
-import { useState, useMemo } from 'react';
-interface Actions<T> {
-  set: (val: T) => void;
+import { useMemo, useState } from 'react';
+
+export interface Actions<T> {
   setLeft: () => void;
   setRight: () => void;
+  set: (value: T) => void;
   toggle: () => void;
 }
 
-function useToggle<T = boolean>(): [T, Actions<T>];
+function useToggle<T = boolean>(): [boolean, Actions<T>];
+
 function useToggle<T>(defaultValue: T): [T, Actions<T>];
 
 function useToggle<T, U>(
@@ -14,31 +16,40 @@ function useToggle<T, U>(
   reverseValue: U,
 ): [T | U, Actions<T | U>];
 
-function useToggle<T, U>(
-  defaultValue: T = false as T,
-  reverseValue?: U,
-): [T | U, Actions<T | U>] {
-  const [value, setValue] = useState<T | U>(defaultValue);
+function useToggle<D, R>(
+  defaultValue: D = (false as unknown) as D,
+  reverseValue: R,
+) {
+  const [state, setState] = useState<D | R>(defaultValue);
 
-  const actions: Actions<T | U> = useMemo(() => {
+  const actions: Actions<D | R> = useMemo(() => {
     const reverseValueOrigin = (reverseValue === undefined
       ? !defaultValue
-      : reverseValue) as T | U;
-    const set = (val: T | U) => setValue(val);
-    const setLeft = () => setValue(defaultValue);
-    const setRight = () => setValue(reverseValueOrigin);
-    const toggle = () =>
-      setValue(s => (s === defaultValue ? reverseValueOrigin : defaultValue));
+      : reverseValue) as D | R;
+
+    const toggle = () => {
+      setState(prev =>
+        prev === defaultValue ? reverseValueOrigin : defaultValue,
+      );
+    };
+
+    const setLeft = () => {
+      setState(defaultValue);
+    };
+
+    const setRight = () => {
+      setState(reverseValueOrigin);
+    };
 
     return {
-      set,
+      set: setState,
+      toggle,
       setLeft,
       setRight,
-      toggle,
     };
-  }, [value]);
+  }, []);
 
-  return [value, actions];
+  return [state, actions];
 }
 
 export default useToggle;

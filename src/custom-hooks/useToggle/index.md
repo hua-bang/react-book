@@ -120,10 +120,10 @@ const [state, { toggle, set, setLeft, setRight }] = useToggle<T, U>(defaultValue
 ```ts
 import { useMemo, useState } from 'react';
 
-interface Actions<T> {
+export interface Actions<T> {
   setLeft: () => void;
   setRight: () => void;
-  set: (val: T) => void;
+  set: (value: T) => void;
   toggle: () => void;
 }
 
@@ -138,7 +138,7 @@ function useToggle<T, U>(
 
 function useToggle<D, R>(
   defaultValue: D = (false as unknown) as D,
-  reverseValue?: R,
+  reverseValue: R,
 ) {
   const [state, setState] = useState<D | R>(defaultValue);
 
@@ -147,15 +147,23 @@ function useToggle<D, R>(
       ? !defaultValue
       : reverseValue) as D | R;
 
-    const toggle = () =>
-      setState(s => (s === defaultValue ? reverseValueOrigin : defaultValue));
-    const set = (value: D | R) => setState(value);
-    const setLeft = () => setState(defaultValue);
-    const setRight = () => setState(reverseValueOrigin);
+    const toggle = () => {
+      setState(prev =>
+        prev === defaultValue ? reverseValueOrigin : defaultValue,
+      );
+    };
+
+    const setLeft = () => {
+      setState(defaultValue);
+    };
+
+    const setRight = () => {
+      setState(reverseValueOrigin);
+    };
 
     return {
+      set: setState,
       toggle,
-      set,
       setLeft,
       setRight,
     };
