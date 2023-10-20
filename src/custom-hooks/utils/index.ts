@@ -11,3 +11,6 @@ export function isPlainObject(obj: unknown): obj is Record<string, unknown> {
 
   return true;
 }
+
+export const isUndef = (value: unknown): value is undefined =>
+  typeof value === 'undefined';

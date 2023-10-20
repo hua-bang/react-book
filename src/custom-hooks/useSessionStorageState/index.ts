@@ -1,5 +1,5 @@
-import useStorageByType from '../useStorageState';
+import { createUseStorageState } from '../createUseStorageState';
 
-const useSessionStorageState = useStorageByType(sessionStorage);
+const useSessionStorageState = createUseStorageState(() => sessionStorage);
 
 export default useSessionStorageState;

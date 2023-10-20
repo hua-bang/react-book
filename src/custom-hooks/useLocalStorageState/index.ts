@@ -1,5 +1,5 @@
-import useStorageByType from '../useStorageState';
+import { createUseStorageState } from '../createUseStorageState';
 
-const useLocalStorageState = useStorageByType(localStorage);
+const useLocalStorageState = createUseStorageState(() => localStorage);
 
 export default useLocalStorageState;
