@@ -34,9 +34,11 @@
   },
   "dependencies": {
     "antd": "^4.17.4",
+    "lodash-es": "^4.17.21",
     "react": "^16.12.0"
   },
   "devDependencies": {
+    "@types/lodash-es": "^4.17.10",
     "@umijs/test": "^3.0.5",
     "dumi": "^1.1.0",
     "father-build": "^1.19.1",
