@@ -1,47 +1,42 @@
-import React, { useMemo, useState } from 'react';
+import { useState } from 'react';
+import useMemoizedFn from '../useMemoizedFn';
 
 interface Actions<T> {
-  add: (val: T) => void;
-  remove: (value: T) => void;
+  add: (key: T) => void;
+  remove: (key: T) => void;
   reset: () => void;
 }
 
-const useSet = <T>(initialVal?: Iterable<T>) => {
-  const getInitialVal = () =>
-    initialVal === undefined ? new Set<T>() : new Set(initialVal);
+const useSet = <T>(initialValue?: Iterable<T>): [Set<T>, Actions<T>] => {
+  const getInitValue = () => new Set<T>(initialValue);
 
-  const [set, setSet] = useState<Set<T>>(() => getInitialVal());
+  const [set, setSet] = useState<Set<T>>(getInitValue);
 
-  const actions: Actions<T> = useMemo(() => {
-    const add = (val: T) => {
-      if (set.has(val)) {
-        return;
-      }
-      setSet(prev => {
-        const tempSet = new Set(prev);
-        tempSet.add(val);
-        return tempSet;
-      });
-    };
-    const remove = (val: T) => {
-      if (!set.has(val)) {
-        return;
-      }
-      setSet(prev => {
-        const tempSet = new Set(prev);
-        tempSet.delete(val);
-        return tempSet;
-      });
-    };
-    const reset = () => {
-      setSet(() => getInitialVal());
-    };
-    return {
-      add,
-      remove,
-      reset,
-    };
-  }, [initialVal]);
+  const add = (key: T) => {
+    setSet(prev => {
+      const tempSet = new Set(prev);
+      tempSet.add(key);
+      return tempSet;
+    });
+  };
+
+  const remove = (key: T) => {
+    setSet(prev => {
+      const tempSet = new Set(prev);
+      tempSet.delete(key);
+      return tempSet;
+    });
+  };
+
+  const reset = () => {
+    setSet(getInitValue);
+  };
+
+  const actions: Actions<T> = {
+    add: useMemoizedFn(add),
+    remove: useMemoizedFn(remove),
+    reset: useMemoizedFn(reset),
+  };
 
   return [set, actions];
 };
