@@ -1,29 +1,33 @@
-import { useRef, useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 
-const useLockFn = <P extends any[] = any[], V extends any = any>(
-  fn: (...args: P) => Promise<V>,
-) => {
+interface PromiseFn<Params extends any[], ReturnValue extends any> {
+  (...args: Params): Promise<ReturnValue>;
+}
+
+const useLockFn = <Params extends any[], ReturnValue extends any>(
+  promiseFn: PromiseFn<Params, ReturnValue>,
+): PromiseFn<Params, ReturnValue | undefined> => {
   const lockRef = useRef(false);
 
-  const lockFn = useCallback(
-    async (...args: P) => {
+  return useCallback(
+    async (...args: Params) => {
       if (lockRef.current) {
         return;
       }
+
       lockRef.current = true;
+
       try {
-        const ret = await fn(...args);
-        return ret;
-      } catch (err) {
-        throw err;
-      } finally {
+        const ret = await promiseFn(...args);
         lockRef.current = false;
+        return ret;
+      } catch (e) {
+        lockRef.current = false;
+        throw e;
       }
     },
-    [fn],
+    [promiseFn],
   );
-
-  return lockFn;
 };
 
 export default useLockFn;
