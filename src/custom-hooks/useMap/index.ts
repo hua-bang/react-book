@@ -1,54 +1,56 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
+import useMemoizedFn from '../useMemoizedFn';
 
 interface Actions<K, T> {
-  set: (key: K, val: T) => void;
-  setAll: (newMap: Iterable<readonly [K, T]>) => void;
+  set: (key: K, value: T) => void;
+  setAll: (map: Iterable<readonly [K, T]>) => void;
   remove: (key: K) => void;
   reset: () => void;
   get: (key: K) => T | undefined;
 }
 
-function useMap<K, T>(initialVal?: Iterable<readonly [K, T]>) {
-  const getInitialVal = () =>
-    initialVal === undefined ? new Map<K, T>() : new Map(initialVal);
+function useMap<K, T>(
+  initialValue?: Iterable<[K, T]>,
+): [Map<K, T>, Actions<K, T>] {
+  const getInitValue = () => new Map<K, T>(initialValue);
 
-  const [map, setMap] = useState(() => getInitialVal());
+  const [map, setMap] = useState<Map<K, T>>(getInitValue);
 
-  const actions: Actions<K, T> = useMemo(() => {
-    const set = (key: K, val: T) => {
-      setMap(prev => {
-        const newMap = new Map(prev);
-        newMap.set(key, val);
-        return newMap;
-      });
-    };
+  const set = (key: K, value: T) => {
+    setMap(prev => {
+      const tempMap = new Map(prev);
+      tempMap.set(key, value);
+      return tempMap;
+    });
+  };
 
-    const setAll = (newMap: Iterable<readonly [K, T]>) => {
-      setMap(new Map(newMap));
-    };
+  const setAll = (nextMap: Iterable<readonly [K, T]>) => {
+    setMap(new Map(nextMap));
+  };
 
-    const remove = (key: K) => {
-      setMap(prev => {
-        const newMap = new Map(prev);
-        newMap.delete(key);
-        return newMap;
-      });
-    };
+  const remove = (key: K) => {
+    setMap(prev => {
+      const tempMap = new Map(prev);
+      tempMap.delete(key);
+      return tempMap;
+    });
+  };
 
-    const reset = () => {
-      setMap(() => getInitialVal());
-    };
+  const reset = () => {
+    setMap(getInitValue);
+  };
 
-    const get = (key: K) => map.get(key);
+  const get = (key: K) => {
+    return map.get(key);
+  };
 
-    return {
-      set,
-      get,
-      setAll,
-      remove,
-      reset,
-    };
-  }, [initialVal]);
+  const actions: Actions<K, T> = {
+    set: useMemoizedFn(set),
+    get: useMemoizedFn(get),
+    setAll: useMemoizedFn(setAll),
+    remove: useMemoizedFn(remove),
+    reset: useMemoizedFn(reset),
+  };
 
   return [map, actions];
 }
